@@ -1,6 +1,6 @@
 # ibck
 
-Portfolio sanity-checker for [IBKR](interactivebrokers.com) accounts (name is a pun on `fsck`).
+Portfolio sanity-checker for [IBKR](https://interactivebrokers.com) accounts (name is a pun on `fsck`).
 
 So far, it's fairly primitive/hacky, and is focused only on writing equity options. However, it does present a nice proof-of-concept for a high-level wrapper to the IBKR TWS API that ought to be a huge breath of fresh air (example below).
 
