@@ -1,5 +1,9 @@
 import com.ib.client.EReader
 import io.github.agbrooks.ibck.tws.TWSAdapter
+import io.github.agbrooks.ibck.tws.types.AccountSummary
+
+import scala.concurrent.Await
+import scala.concurrent.duration.DurationInt
 
 // tacky placeholder for quick-and-dirty manual tests
 object Main {
@@ -20,10 +24,10 @@ object Main {
 
     // HACKY PROOF-OF-CONCEPT:
     // THESE SHOULD REALLY BE ABSTRACTED AWAY (AND CLEANED UP)
-    val accountSummary = adapter.getAccountSummary
-    for ((acct, accountData) <- accountSummary.accountData) {
+    val accountSummary = Await.result(adapter.getAccountSummary, 10 seconds)
+    for ((acct, accountData) <- accountSummary.all) {
       println(f"Checking account ${acct}...")
-      val positions = adapter.getPositions(acct)
+      val positions = Await.result(adapter.getPositions(acct), 10 seconds)
 
       // Ensure puts are cash-secured
       val cashToSecureShortPuts = positions

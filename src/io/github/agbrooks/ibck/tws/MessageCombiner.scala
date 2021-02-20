@@ -3,10 +3,9 @@ package io.github.agbrooks.ibck.tws
 
 import scala.collection.mutable
 import scala.concurrent.duration.DurationInt
-import scala.concurrent.{Await, Promise}
+import scala.concurrent.{Await, Awaitable, Future, Promise}
 import scala.util.Try
 import scala.language.postfixOps
-
 import java.util.logging.Logger
 
 
@@ -39,8 +38,7 @@ import java.util.logging.Logger
  * @tparam Part Type of each incremental message, which can be submit()-ted to the MessageCombiner
  * @tparam Whole Eventual result produced by the MessageCombiner after finish() is called
  */
-class MessageCombiner[Part, Whole](val combiner: Iterable[Part] => Try[Whole]) {
-  private var lastReqId: Int = 0
+class MessageCombiner[Part, Whole](val idGenerator: RequestIdGenerator, val combiner: Iterable[Part] => Try[Whole]) {
   private val requests: mutable.Map[Int, Fragments] = mutable.Map.empty
   protected val logger: Logger = Logger.getLogger(getClass.getName)
 
@@ -62,11 +60,11 @@ class MessageCombiner[Part, Whole](val combiner: Iterable[Part] => Try[Whole]) {
    *                    finish().
    * @return The assembled Whole.
    */
-  def usingRequestId(makeRequest: Int => Unit): Whole = {
+  def usingRequestId(makeRequest: Int => Unit): Future[Whole] = {
     val (req, promise) = nextRequest()
     try {
       makeRequest(req)
-      Await.result(promise.future, 10 seconds)
+      promise.future
     } catch {
       case exc: Exception =>
         cancel(req)
@@ -118,11 +116,9 @@ class MessageCombiner[Part, Whole](val combiner: Iterable[Part] => Try[Whole]) {
    * @return the integer request ID and a promise for the Whole.
    */
   private def nextRequest(): (Int, Promise[Whole]) = synchronized {
-    lastReqId += 1
+    val reqId = idGenerator.nextRequestId()
     val fragments = Fragments()
-    requests.put(lastReqId, fragments)
-    (lastReqId, fragments.result)
+    requests.put(reqId, fragments)
+    (reqId, fragments.result)
   }
 }
-
-

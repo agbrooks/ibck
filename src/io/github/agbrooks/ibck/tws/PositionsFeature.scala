@@ -2,6 +2,7 @@ package io.github.agbrooks.ibck.tws
 import com.ib.client.Contract
 import io.github.agbrooks.ibck.tws.types.Position
 
+import scala.concurrent.{Awaitable, Future}
 import scala.language.implicitConversions
 import scala.util.Try
 
@@ -10,7 +11,7 @@ import scala.util.Try
  */
 trait PositionsFeature extends BaseTWSAdapter {
   private final val posCombiner: MessageCombiner[Position, Array[Position]] =
-    new MessageCombiner(parts => Try(parts.toArray))
+    new MessageCombiner(requestIdGenerator, parts => Try(parts.toArray))
 
   /**
    * Get all positions associated with the specified account.
@@ -21,7 +22,7 @@ trait PositionsFeature extends BaseTWSAdapter {
    * @param account The account number string
    * @return All positions in the account
    */
-  def getPositions(account: String): Array[Position] = posCombiner.usingRequestId(reqId => {
+  def getPositions(account: String): Future[Array[Position]] = posCombiner.usingRequestId(reqId => {
     // FIXME: The "model code" isn't particularly well documented in TWS. I seem to get correct results by
     // FIXME: specifying null, but I don't know if that can be relied on for other users!
     clientSocket.reqPositionsMulti(reqId, account, null)

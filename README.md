@@ -41,8 +41,6 @@ which is substantially easier than using the IBKR TWS API "directly".
 
 * The notion of a "sanity check" should probably be abstracted away to allow us to factor out some of the spaghetti in `Main` and make it easy to extend the set of available sanity checks.
 
-* The "account summary" functionality doesn't expect to receive a _subscription_ to account summary data (that's my mistake; the TWS API docs are very clear on this point).
-
 * There's no `build.sbt` (sorry).
 
 * There's no way to specify the host/port of TWS / the IBKR gateway from the command line; it's assumed to be the default.

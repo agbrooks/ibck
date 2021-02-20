@@ -21,6 +21,7 @@ protected class BaseTWSAdapter
   val readerSignal: EJavaSignal = new EJavaSignal(),
 ) extends EWrapper {
 
+  val requestIdGenerator: RequestIdGenerator = new RequestIdGenerator();
   val clientSocket: EClientSocket = new EClientSocket(this, readerSignal);
   protected val logger: Logger = Logger.getLogger(getClass.getName)
 
