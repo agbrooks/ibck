@@ -21,7 +21,7 @@ protected class BaseTWSAdapter
   val readerSignal: EJavaSignal = new EJavaSignal(),
 ) extends EWrapper {
 
-  val requestIdGenerator: RequestIdGenerator = new RequestIdGenerator();
+  val requestIdGenerator: RequestIdGenerator = new IncrementingRequestIdGenerator();
   val clientSocket: EClientSocket = new EClientSocket(this, readerSignal);
   protected val logger: Logger = Logger.getLogger(getClass.getName)
 
@@ -81,9 +81,20 @@ protected class BaseTWSAdapter
 
   override def tickEFP(i: Int, i1: Int, v: Double, s: String, v1: Double, i2: Int, s1: String, v2: Double, v3: Double): Unit = ???
 
-  override def orderStatus(i: Int, s: String, v: Double, v1: Double, v2: Double, i1: Int, i2: Int, v3: Double, i3: Int, s1: String, v4: Double): Unit = ???
+  override def orderStatus
+  (orderId: Int,
+   status: String,
+   filled: Double,
+   remaining: Double,
+   avgFillPrice: Double,
+   permId: Int,
+   parentId: Int,
+   lastFillPrice: Double,
+   clientId: Int,
+   whyHeld: String,
+   mktCapPrice: Double): Unit = ???
 
-  override def openOrder(i: Int, contract: Contract, order: Order, orderState: OrderState): Unit = ???
+  override def openOrder(orderId: Int, contract: Contract, order: Order, orderState: OrderState): Unit = ???
 
   override def openOrderEnd(): Unit = ???
 
