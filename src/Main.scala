@@ -1,11 +1,11 @@
 import com.ib.client.EReader
+import io.github.agbrooks.ibck.analysis.{CashSecuredCheck, NakedCallCheck}
 import io.github.agbrooks.ibck.tws.TWSAdapter
-import io.github.agbrooks.ibck.tws.types.AccountSummary
 
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 
-// tacky placeholder for quick-and-dirty manual tests
+// This needs some work - should probably add some nice command line argument parsing, etc.
 object Main {
   def main(args: Array[String]): Unit = {
     val adapter: TWSAdapter = new TWSAdapter()
@@ -22,41 +22,31 @@ object Main {
     })
     thr.start()
 
-    // HACKY PROOF-OF-CONCEPT:
-    // THESE SHOULD REALLY BE ABSTRACTED AWAY (AND CLEANED UP)
+    // Might want to configure these based on CLI args or something
+    // may also want to have a check that confirms that your portfolio is one that we're able to sanity-check
+    // effectively
+    val portfolioChecks = Seq(
+      new CashSecuredCheck(90),
+      new NakedCallCheck
+    )
+
+    // Should probably move pretty formatting stuff out of main
+    var failedChecks = 0
     val accountSummary = Await.result(adapter.getAccountSummary, 10 seconds)
     for ((acct, accountData) <- accountSummary.all) {
-      println(f"Checking account ${acct}...")
       val positions = Await.result(adapter.getPositions(acct), 10 seconds)
-
-      // Ensure puts are cash-secured
-      val cashToSecureShortPuts = positions
-        .filter(x => x.isPut && x.isShort)
-        .map(pos => pos.contract.strike * pos.contract.multiplier().toDouble * -pos.quantity)
-        .sum
-      val excessCash = accountData.cash - cashToSecureShortPuts
-      println(f"  Cash balance exceeding what's needed to secure short puts: ${excessCash}")
-
-      // Ensure all calls are covered
-      val needSharesToCover: Map[String, Double] = positions
-        .filter(p => (p.isCall && p.isShort) || p.isStock)
-        .map(p => {
-          if (p.isCall) {
-            (p.contract.symbol(), p.contract.multiplier.toDouble * p.quantity)
-          } else {
-            (p.contract.symbol(), p.quantity)
+      println(f"ACCOUNT ${acct}:")
+      for (check <- portfolioChecks) {
+        println(s"... ${check.title().toUpperCase}")
+        for (remark <- check.run(positions, accountData)) {
+          val bullet = if (remark.isProblem) "[FIXME] " else "[OK]    "
+          if (remark.isProblem) {
+            failedChecks += 1
           }
-        })
-        .groupBy(_._1).view // Yes, this is too much stuff chained together, but this is a quick hack, we'll fix later
-        .mapValues(_.map(_._2).sum[Double] * -1)
-        .filter(_._2 > 0)
-        .toMap
-      for ((symbol, required) <- needSharesToCover) {
-        println(f"  You need ${required} more shares of ${symbol} to cover your calls")
-      }
-      if (needSharesToCover.isEmpty) {
-        println("  All short calls are covered (...whew)")
+          println(s"      $bullet ${remark.description}")
+        }
       }
     }
+    System.exit(failedChecks)
   }
 }

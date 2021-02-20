@@ -63,6 +63,8 @@ case class Position(contract: Contract, quantity: Double, averageCost: Double) {
   // know as much about behaves differently...
   def strike: Option[Double] = Option(contract.strike()).filter(_ != 0)
 
+  def multiplier: Option[Double] = Option(contract.multiplier()).flatMap(_.toDoubleOption)
+
   /**
    * Get the position's expiration, if it has one.
    *
