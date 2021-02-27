@@ -47,6 +47,8 @@ object Main {
         }
       }
     }
+    // ...Just messing around...
+    //adapter.stockQuote("IBKR", "Q")
     System.exit(failedChecks)
   }
 }

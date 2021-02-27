@@ -31,5 +31,4 @@ class TWSAdapter(host: String = "localhost", port: Int = 7496, clientId: Int = 0
   with AccountSummaryFeature
   with OpenOrdersFeature
   with PositionsFeature
-  // TODO: Option Quotes / Greeks (the 'tick' API) : Make 'oneshot' case for MessageCombiner?
-  // TODO: 'normal' quotes : Can snapshot (use MessageCombiner) or maybe make a better pub/sub-focused abstraction?
+  with QuotesFeature

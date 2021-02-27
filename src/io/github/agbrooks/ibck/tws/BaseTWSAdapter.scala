@@ -25,7 +25,10 @@ protected class BaseTWSAdapter
   val clientSocket: EClientSocket = new EClientSocket(this, readerSignal);
   protected val logger: Logger = Logger.getLogger(getClass.getName)
 
-  def reconnect(): Unit = clientSocket.eConnect(host, port, clientId);
+  def reconnect(): Unit = {
+    logger.setLevel(Level.ALL)
+    clientSocket.eConnect(host, port, clientId)
+  };
 
   /*
    * BARE MINIMUM EWRAPPER IMPLEMENTATIONS FOR CONNECTIVITY TO TWS
@@ -69,15 +72,24 @@ protected class BaseTWSAdapter
    **************************************************************************
    */
 
-  override def tickPrice(i: Int, i1: Int, v: Double, tickAttrib: TickAttrib): Unit = ???
+  override def tickPrice(tickerId: Int, field: Int, price: Double, tickAttrib: TickAttrib): Unit = ???
 
-  override def tickSize(i: Int, i1: Int, i2: Int): Unit = ???
+  override def tickSize(tickerId: Int, field: Int, size: Int): Unit = ???
 
-  override def tickOptionComputation(i: Int, i1: Int, v: Double, v1: Double, v2: Double, v3: Double, v4: Double, v5: Double, v6: Double, v7: Double): Unit = ???
+  override def tickOptionComputation
+  (tickerId: Int,
+   field: Int, impliedVolatility: Double,
+   delta: Double,
+   optPrice: Double,
+   pvDividend: Double,
+   gamma: Double,
+   vega: Double,
+   theta: Double,
+   undPrice: Double): Unit = ???
 
-  override def tickGeneric(i: Int, i1: Int, v: Double): Unit = ???
+  override def tickGeneric(tickerId: Int, field: Int, value: Double): Unit = ???
 
-  override def tickString(i: Int, i1: Int, s: String): Unit = ???
+  override def tickString(tickerId: Int, field: Int, value: String): Unit = ???
 
   override def tickEFP(i: Int, i1: Int, v: Double, s: String, v1: Double, i2: Int, s1: String, v2: Double, v3: Double): Unit = ???
 
@@ -106,11 +118,11 @@ protected class BaseTWSAdapter
 
   override def accountDownloadEnd(s: String): Unit = ???
 
-  override def contractDetails(i: Int, contractDetails: ContractDetails): Unit = ???
+  override def contractDetails(reqId: Int, contractDetails: ContractDetails): Unit = ???
 
   override def bondContractDetails(i: Int, contractDetails: ContractDetails): Unit = ???
 
-  override def contractDetailsEnd(i: Int): Unit = ???
+  override def contractDetailsEnd(reqId: Int): Unit = ???
 
   override def execDetails(i: Int, contract: Contract, execution: Execution): Unit = ???
 
@@ -174,9 +186,16 @@ protected class BaseTWSAdapter
 
   override def accountUpdateMultiEnd(i: Int): Unit = ???
 
-  override def securityDefinitionOptionalParameter(i: Int, s: String, i1: Int, s1: String, s2: String, set: util.Set[String], set1: util.Set[lang.Double]): Unit = ???
+  override def securityDefinitionOptionalParameter
+  (reqId: Int,
+   exchange: String,
+   underlyingConId: Int,
+   tradingClass: String,
+   multiplier: String,
+   expirations: util.Set[String],
+   strikes: util.Set[lang.Double]): Unit = ???
 
-  override def securityDefinitionOptionalParameterEnd(i: Int): Unit = ???
+  override def securityDefinitionOptionalParameterEnd(reqId: Int): Unit = ???
 
   override def softDollarTiers(i: Int, softDollarTiers: Array[SoftDollarTier]): Unit = ???
 
