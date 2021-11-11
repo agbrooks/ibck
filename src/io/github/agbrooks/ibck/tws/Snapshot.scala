@@ -3,9 +3,8 @@ package io.github.agbrooks.ibck.tws
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantReadWriteLock
-
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Awaitable, Future}
+import scala.concurrent.{Awaitable, Future, blocking}
 
 /**
  * A "Snapshot" holds the most recently-observed value of some quantity.
@@ -63,12 +62,14 @@ class Snapshot[T](val initialValue: Option[T] = None, val placeRequest: () => Un
    * @return
    */
   def get: Future[T] = Future {
-    ensureRequestedAndWait()
-    gotAnyValue.await()
-    try {
-      rlock.lockInterruptibly()
-      snapshotted.get
-    } finally rlock.unlock()
+    blocking {
+      ensureRequestedAndWait()
+      gotAnyValue.await()
+      try {
+        rlock.lockInterruptibly()
+        snapshotted.get
+      } finally rlock.unlock()
+    }
   }
 
   /**
@@ -91,4 +92,5 @@ class Snapshot[T](val initialValue: Option[T] = None, val placeRequest: () => Un
 object Snapshot {
   def apply[T](placeRequest: () => Unit): Snapshot[T] = new Snapshot(None, placeRequest)
   def apply[T](initialValue: T, placeRequest: () => Unit): Snapshot[T] = new Snapshot(Some(initialValue), placeRequest)
+  def empty[T](): Snapshot[T] = new Snapshot(None, () => ())
 }
