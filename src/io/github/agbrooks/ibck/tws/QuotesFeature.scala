@@ -4,7 +4,7 @@ import scala.collection.mutable
 import java.util.logging.Level
 import com.ib.client.Types.SecType
 import com.ib.client.{Contract, ContractDetails, TickAttrib}
-import io.github.agbrooks.ibck.tws.types.{NascentQuote, Quote, Stock, TickType}
+import io.github.agbrooks.ibck.tws.types.{Quote, Stock, TickType}
 import io.github.agbrooks.ibck.tws.types.TickType.{AskPrice, AskSize, BidExchange, BidPrice, BidSize, TickType, UnknownTick}
 
 import scala.concurrent.ExecutionContext.Implicits.global
